@@ -7,6 +7,8 @@ public class SelectionHandler : MonoBehaviour
 {
     [Tooltip("드래그 표시용 사각형 박스 외형")]
     [SerializeField] private RectTransform _selectionBoxVisual;
+    [Tooltip("단일타겟 감지용 최소 드래그 거리")]
+    [SerializeField] private float _minimumDragDistance = 5f;
     private InputSystem_Actions _inputActions;
     private Vector2 _dragStartPos;
     private bool _isDragging = false;
@@ -70,7 +72,17 @@ public class SelectionHandler : MonoBehaviour
     {
         _isDragging = false;
         _isFirstFrame = false;
-        SelectUnits();
+
+        float distance = Vector2.Distance(_dragStartPos, _inputActions.Player.MousePosition.ReadValue<Vector2>());
+
+        if (distance < _minimumDragDistance)
+        {
+            SelectSingleUnit();
+        }
+        else
+        {
+            SelectUnits();
+        }            
         _selectionBoxVisual.gameObject.SetActive(false);
     }
 
@@ -92,6 +104,30 @@ public class SelectionHandler : MonoBehaviour
             {
                 unit.SetUnitSelected(false);
             }
+        }
+    }
+
+    private void SelectSingleUnit()
+    {
+        ClearAllSelection();
+
+        Ray ray = Camera.main.ScreenPointToRay(_inputActions.Player.MousePosition.ReadValue<Vector2>());
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, 200f))
+        {
+            SelectableUnit unit = hit.collider.GetComponent<SelectableUnit>();
+            if (unit != null)
+            {
+                unit.SetUnitSelected(true);
+            }
+        }
+    }
+    private void ClearAllSelection()
+    {
+        foreach (var unit in _unitmanager.UnitList)
+        {
+            unit.SetUnitSelected(false);
         }
     }
 }
