@@ -10,6 +10,7 @@ public class SelectionHandler : MonoBehaviour
     private InputSystem_Actions _inputActions;
     private Vector2 _dragStartPos;
     private bool _isDragging = false;
+    private bool _isFirstFrame = false;
 
     private void Awake()
     {
@@ -31,13 +32,9 @@ public class SelectionHandler : MonoBehaviour
 
 
     private void OnSelectStarted(InputAction.CallbackContext context)
-    {
-        _dragStartPos = _inputActions.Player.MousePosition.ReadValue<Vector2>();
+    {        
         _isDragging = true;
-
-        _selectionBoxVisual.gameObject.SetActive(true);
-        _selectionBoxVisual.sizeDelta = Vector2.zero;
-        _selectionBoxVisual.anchoredPosition = _dragStartPos;        
+        _isFirstFrame = true;             
     }
 
     private void Update()
@@ -45,6 +42,16 @@ public class SelectionHandler : MonoBehaviour
         if (!_isDragging) return;
         
         Vector2 currentMousePos = _inputActions.Player.MousePosition.ReadValue<Vector2>();
+
+        if (_isFirstFrame)
+        {
+            _dragStartPos = _inputActions.Player.MousePosition.ReadValue<Vector2>();
+            _selectionBoxVisual.gameObject.SetActive(true);
+            _selectionBoxVisual.sizeDelta = Vector2.zero;
+            _selectionBoxVisual.anchoredPosition = _dragStartPos;
+            _isFirstFrame = false;
+            return;
+        }
 
         float width = currentMousePos.x - _dragStartPos.x;
         float height = currentMousePos.y - _dragStartPos.y;
@@ -56,6 +63,7 @@ public class SelectionHandler : MonoBehaviour
     private void OnSelectCanceled(InputAction.CallbackContext context)
     {
         _isDragging = false;
+        _isFirstFrame = false;
         _selectionBoxVisual.gameObject.SetActive(false);
     }
 }
