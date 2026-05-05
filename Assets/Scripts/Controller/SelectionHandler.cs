@@ -11,6 +11,7 @@ public class SelectionHandler : MonoBehaviour
     private Vector2 _dragStartPos;
     private bool _isDragging = false;
     private bool _isFirstFrame = false;
+    Test_Unitmanager _unitmanager;
 
     private void Awake()
     {
@@ -28,6 +29,11 @@ public class SelectionHandler : MonoBehaviour
     private void OnDisable()
     {
         _inputActions.Disable();
+    }
+
+    private void Start()
+    {
+        _unitmanager = Test_Unitmanager.Instance;
     }
 
 
@@ -64,6 +70,28 @@ public class SelectionHandler : MonoBehaviour
     {
         _isDragging = false;
         _isFirstFrame = false;
+        SelectUnits();
         _selectionBoxVisual.gameObject.SetActive(false);
+    }
+
+    private void SelectUnits()
+    {
+        Vector2 min = Vector2.Min(_dragStartPos, _inputActions.Player.MousePosition.ReadValue<Vector2>());
+        Vector2 max = Vector2.Max(_dragStartPos, _inputActions.Player.MousePosition.ReadValue<Vector2>());
+        Rect selectionRect = new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+
+        foreach (SelectableUnit unit in _unitmanager.UnitList)
+        {            
+            Vector2 unitScreenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
+
+            if (selectionRect.Contains(unitScreenPos))
+            {
+                unit.SetUnitSelected(true);                                        
+            }
+            else
+            {
+                unit.SetUnitSelected(false);
+            }
+        }
     }
 }
