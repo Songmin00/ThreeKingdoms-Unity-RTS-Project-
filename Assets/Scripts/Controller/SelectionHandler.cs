@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 
@@ -13,7 +14,10 @@ public class SelectionHandler : MonoBehaviour
     private Vector2 _dragStartPos;
     private bool _isDragging = false;
     private bool _isFirstFrame = false;
-    Test_Unitmanager _unitmanager;
+    private bool _isShiftPressed => _inputActions.Player.Shift.IsPressed();
+
+    private Test_Unitmanager _unitmanager;
+
 
     private void Awake()
     {
@@ -88,6 +92,11 @@ public class SelectionHandler : MonoBehaviour
 
     private void SelectUnits()
     {
+        if (!_isShiftPressed)
+        {
+            ClearAllSelection();
+        }
+
         Vector2 min = Vector2.Min(_dragStartPos, _inputActions.Player.MousePosition.ReadValue<Vector2>());
         Vector2 max = Vector2.Max(_dragStartPos, _inputActions.Player.MousePosition.ReadValue<Vector2>());
         Rect selectionRect = new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
@@ -97,19 +106,17 @@ public class SelectionHandler : MonoBehaviour
             Vector2 unitScreenPos = Camera.main.WorldToScreenPoint(unit.transform.position);
 
             if (selectionRect.Contains(unitScreenPos))
-            {
+            {                
                 unit.SetUnitSelected(true);                                        
-            }
-            else
-            {
-                unit.SetUnitSelected(false);
-            }
+            }            
         }
     }
 
     private void SelectSingleUnit()
     {
-        ClearAllSelection();
+        bool isShiftPressed = _isShiftPressed;
+
+          
 
         Ray ray = Camera.main.ScreenPointToRay(_inputActions.Player.MousePosition.ReadValue<Vector2>());
         RaycastHit hit;
@@ -117,10 +124,21 @@ public class SelectionHandler : MonoBehaviour
         if (Physics.Raycast(ray, out hit, 200f))
         {
             SelectableUnit unit = hit.collider.GetComponent<SelectableUnit>();
-            if (unit != null)
+            if (unit == null)
             {
+                return;                
+            }
+
+            if (isShiftPressed)
+            {
+                unit.SetUnitSelected(!unit.IsSelected);
+            }
+            else
+            {
+                ClearAllSelection();
                 unit.SetUnitSelected(true);
             }
+            
         }
     }
     private void ClearAllSelection()

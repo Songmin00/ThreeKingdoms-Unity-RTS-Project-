@@ -5,7 +5,7 @@ public class Test_Unitmanager : MonoBehaviour
 {
     public static Test_Unitmanager Instance;
 
-    public List<SelectableUnit> UnitList;
+    public List<SelectableUnit> UnitList = new List<SelectableUnit>();
 
     private void Awake()
     {
