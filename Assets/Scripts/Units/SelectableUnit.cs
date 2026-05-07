@@ -25,6 +25,6 @@ public class SelectableUnit : MonoBehaviour
             Debug.LogError($"{gameObject.name} : 선택 확인 원형 이미지 미할당");
             return;
         }
-        _selectionCircle.gameObject.SetActive(isSelected);
+        _selectionCircle.gameObject.SetActive(isSelected);        
     }
 }

@@ -29,6 +29,7 @@ public class SelectionHandler : MonoBehaviour
     {
         _inputActions.Player.Select.started += OnSelectStarted;
         _inputActions.Player.Select.canceled += OnSelectCanceled;
+        _inputActions.Player.RightClick.started += OnRightMoveCommand;
         _inputActions.Enable();
     }
 
@@ -107,7 +108,7 @@ public class SelectionHandler : MonoBehaviour
 
             if (selectionRect.Contains(unitScreenPos))
             {                
-                unit.SetUnitSelected(true);                                        
+                _unitmanager.SetUnitSelected(unit, true);
             }            
         }
     }
@@ -131,12 +132,12 @@ public class SelectionHandler : MonoBehaviour
 
             if (isShiftPressed)
             {
-                unit.SetUnitSelected(!unit.IsSelected);
+                _unitmanager.SetUnitSelected(unit, !unit.IsSelected);
             }
             else
             {
-                ClearAllSelection();
-                unit.SetUnitSelected(true);
+                ClearAllSelection();                
+                _unitmanager.SetUnitSelected(unit, true);
             }
             
         }
@@ -145,7 +146,28 @@ public class SelectionHandler : MonoBehaviour
     {
         foreach (var unit in _unitmanager.UnitList)
         {
-            unit.SetUnitSelected(false);
+            _unitmanager.SetUnitSelected(unit, false);
+        }
+    }
+
+    //----------------------------------------------------------------------------------
+
+    private void OnRightMoveCommand(InputAction.CallbackContext ctx)
+    {
+        if (_unitmanager.UnitList.Count == 0) return;
+
+        Ray ray = Camera.main.ScreenPointToRay(_inputActions.Player.MousePosition.ReadValue<Vector2>());
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            foreach (var unit in _unitmanager.SelectedUnitList)
+            {
+                var agent = unit.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                if (agent != null)
+                {
+                    agent.SetDestination(hit.point);
+                }
+            }
         }
     }
 }
