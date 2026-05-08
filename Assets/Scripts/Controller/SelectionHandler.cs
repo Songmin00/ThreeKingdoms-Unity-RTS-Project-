@@ -154,7 +154,7 @@ public class SelectionHandler : MonoBehaviour
 
     private void OnRightMoveCommand(InputAction.CallbackContext ctx)
     {
-        if (_unitmanager.UnitList.Count == 0) return;
+        if (_unitmanager.SelectedUnitList.Count == 0) return;
 
         Ray ray = Camera.main.ScreenPointToRay(_inputActions.Player.MousePosition.ReadValue<Vector2>());
 
@@ -164,7 +164,7 @@ public class SelectionHandler : MonoBehaviour
             {
                 var agent = unit.GetComponent<UnityEngine.AI.NavMeshAgent>();
                 if (agent != null)
-                {
+                {                    
                     agent.SetDestination(hit.point);
                 }
             }
